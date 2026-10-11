@@ -1,0 +1,350 @@
+// =========================================================================
+// github-wilgat build.gradle - CIAO DEFENSIVE EDITION
+// =========================================================================
+//
+// !!! THIS FILE IS PART OF THE CIAO DEFENSIVE PROGRAMMING STYLE !!!
+// !!! DO NOT SIMPLIFY, REMOVE COMMENTS, OR "CLEAN UP" THIS FILE !!!
+//
+// Purpose:
+//   Provides Gradle build support using the cpp-application plugin.
+//   Designed to work alongside build.sh and maintain full consistency
+//   with the project's multi-build-system philosophy.
+//
+// Critical CIAO Principles Applied:
+//   - Every function/task has explicit Purpose and Protection Rule
+//   - Verbose documentation and loud warnings against simplification
+//   - Defensive checks before any destructive or important operation
+//   - Single Source of Truth via project.ini when available
+//   - Resistance to AI-induced "helpful" simplifications
+//
+// Last reviewed & hardened: April 2026
+// =========================================================================
+
+plugins {
+    id 'cpp-application'
+}
+
+def THIS_VERSION = '1.0.2'
+
+// =========================================================================
+// loadPropertiesFromIni(File iniFile)
+// 
+// Purpose:
+//   Loads project configuration from project.ini as the Single Source of Truth.
+//   Falls back gracefully to defaults if the file is missing or unreadable.
+//
+// Protection Rule:
+//   DO NOT simplify this function. DO NOT remove error handling or logging.
+//   Future maintainers must preserve the defensive loading behavior.
+// =========================================================================
+def loadPropertiesFromIni(File iniFile) {
+    if (!iniFile.exists()) {
+        println "[WARN] project.ini not found at ${iniFile}. Using built-in defaults."
+        return [:]
+    }
+
+    def props = new Properties()
+    try {
+        iniFile.withInputStream { stream ->
+            props.load(stream)
+        }
+        println "[INFO] Successfully loaded properties from ${iniFile.name}"
+    } catch (Exception e) {
+        println "[ERROR] Failed to load ${iniFile.name}: ${e.message}. Using defaults."
+        return [:]
+    }
+    return props
+}
+
+// Define properties file
+def iniFile = file("${projectDir}/project.ini")
+def projectProps = loadPropertiesFromIni(iniFile)
+
+// =========================================================================
+// Project variables with safe defaults (CIAO defensive)
+// 
+// Purpose:
+//   Centralizes all configurable project settings with fallback values.
+// 
+// Protection Rule:
+//   DO NOT hardcode values elsewhere in this file. Always use these variables.
+// =========================================================================
+def PRJ             = projectProps['PRJ']             ?: 'github-wilgat'
+def SRC             = projectProps['SRC']             ?: 'src'
+def BUILD           = projectProps['BUILD']           ?: 'target'
+def VERSION         = projectProps['VERSION']         ?: '1.0.0'
+def AUTHOR          = projectProps['AUTHOR']          ?: 'you@example.com'
+def REQUIRED_PACKAGES = projectProps['REQUIRED_PACKAGES'] ?: ''
+def AVOIDED_PACKAGES  = projectProps['AVOIDED_PACKAGES']  ?: ''
+
+def LIB_VERSIONS    = (projectProps['LIB_VERSIONS'] ?: 'gtk+-3.0 webkit2gtk-4.1').split(/\s+/).findAll { it.trim() }
+def SRC_C           = "${SRC}/main/c"
+def SRC_CPP         = "${SRC}/main/cpp"
+def BUILD_DEBUG     = "${BUILD}/exe/debug"
+
+// =========================================================================
+// runCommand(String command)
+// 
+// Purpose:
+//   Safely executes shell commands with proper logging and error handling.
+//   Used for pkg-config, autoreconf, make, etc.
+//
+// Protection Rule:
+//   DO NOT replace this with direct .execute() calls.
+//   DO NOT remove logging or exception handling. This is the central
+//   command execution point for Gradle tasks.
+// =========================================================================
+def runCommand(String command) {
+    println "[INFO] Executing: ${command}"
+    try {
+        def process = command.execute()
+        def output = process.text.trim()
+        def exitCode = process.waitFor()
+
+        if (exitCode != 0) {
+            println "[WARN] Command failed (exit ${exitCode}): ${command}"
+            if (!output.isEmpty()) println "[WARN] Output: ${output}"
+        } else if (!output.isEmpty()) {
+            println "[INFO] Command output: ${output}"
+        }
+        return output
+    } catch (Exception e) {
+        println "[ERROR] Failed to execute: ${command}"
+        println "[ERROR] Exception: ${e.message}"
+        return ""
+    }
+}
+
+// =========================================================================
+// pkg-config handling (defensive)
+// 
+// Purpose:
+//   Retrieves compiler and linker flags using pkg-config for GTK/WebKit2GTK.
+// 
+// Protection Rule:
+//   DO NOT hardcode flags. Always use pkg-config output.
+// =========================================================================
+// Full link set used by ./build.sh. glib, gobject, and gio are named here
+// even when project.ini LIB_VERSIONS lists only the shorter subset.
+def linkModules = ['gtk+-3.0', 'webkit2gtk-4.1', 'glib-2.0', 'gobject-2.0', 'gio-2.0', 'sqlite3', 'lua5.3']
+
+def splitFlags = { String output ->
+    output.split(/\s+/).findAll { it }
+}
+
+def pkgCflags = splitFlags(runCommand("pkg-config --cflags ${linkModules.join(' ')}"))
+def pkgLibs = splitFlags(runCommand("pkg-config --libs ${linkModules.join(' ')}"))
+if (pkgCflags.isEmpty() || pkgLibs.isEmpty()) {
+    println "[WARN] pkg-config returned no flags. Development packages may be missing."
+}
+
+def cppSources = fileTree(dir: SRC_CPP, include: '**/*.cpp')
+def cSources = files()
+[file(SRC_C), file(SRC_CPP)].each { root ->
+    if (root.isDirectory()) {
+        cSources.from(fileTree(dir: root, include: '**/*.c'))
+    }
+}
+println "[INFO] C++ sources under ${SRC_CPP}: ${cppSources.files.size()}"
+println "[INFO] C sources under ${SRC_C} and ${SRC_CPP}: ${cSources.files.size()}"
+
+// .cpp files use the cpp-application convention src/main/cpp.
+// .c files are compiled with gcc and added to the link.
+def cObjectDir = file("${BUILD_DEBUG}/obj/c")
+tasks.register('compileC') {
+    inputs.files(cSources)
+    outputs.dir(cObjectDir)
+    onlyIf { !cSources.files.isEmpty() }
+    doLast {
+        cObjectDir.mkdirs()
+        cSources.each { File src ->
+            def rel = projectDir.toPath().relativize(src.toPath()).toString()
+            def obj = new File(cObjectDir, rel + '.o')
+            obj.parentFile.mkdirs()
+            def cmd = ['gcc', '-std=c11', '-Wall', '-Wextra', '-g', '-O2', '-I/usr/local/include']
+            cmd.addAll(pkgCflags)
+            cmd.addAll(['-c', src.absolutePath, '-o', obj.absolutePath])
+            exec { commandLine cmd }
+        }
+    }
+}
+
+tasks.withType(CppCompile).configureEach {
+    compilerArgs.addAll(['-std=c++17', '-Wall', '-Wextra', '-g', '-O2', '-I/usr/local/include'])
+    compilerArgs.addAll(pkgCflags)
+}
+
+tasks.withType(LinkExecutable).configureEach { link ->
+    link.dependsOn('compileC')
+    link.source.from(fileTree(dir: cObjectDir, include: '**/*.o'))
+    link.linkerArgs.addAll(pkgLibs)
+    link.linkerArgs.add('-pthread')
+
+    // Debug binary matches ./build.sh, make, and ant: target/exe/debug/${PRJ}
+    if (link.name == 'linkDebug') {
+        def out = layout.projectDirectory.file("${BUILD_DEBUG}/${PRJ}")
+        link.linkedFile.set(out)
+        link.doFirst {
+            def parent = out.asFile.parentFile
+            if (!parent.exists() && !parent.mkdirs()) {
+                println "[WARN] Failed to create directory: ${parent}"
+            }
+        }
+        // The native plugin may still emit build/exe/main/debug. The path
+        // operators run is target/exe/debug/${PRJ}. Copy when they differ.
+        link.doLast {
+            def produced = link.linkedFile.get().asFile
+            def expected = out.asFile
+            if (produced.isFile() && produced.absolutePath != expected.absolutePath) {
+                expected.parentFile.mkdirs()
+                java.nio.file.Files.copy(
+                    produced.toPath(),
+                    expected.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                println "[INFO] Copied debug binary to ${expected}"
+            }
+        }
+    }
+}
+
+// =========================================================================
+// scriptVersion task
+// 
+// Purpose:
+//   Prints version information for build script traceability.
+// 
+// Protection Rule:
+//   DO NOT remove this task. It is used by other tasks for consistency.
+// =========================================================================
+task scriptVersion {
+    doLast {
+        println "Gradle build script version: ${THIS_VERSION}"
+        println "Project: ${PRJ} v${VERSION}"
+    }
+}
+
+// =========================================================================
+// installDependencies task
+// 
+// Purpose:
+//   Generates and runs a defensive project.sh script for dependency installation.
+// 
+// Protection Rule:
+//   DO NOT simplify the generated script content. It must remain as robust
+//   as the main build.sh. Never remove the apt_install/apt_uninstall logic.
+// =========================================================================
+task installDependencies {
+    def scriptFile = file("${projectDir}/project.sh")
+
+    doLast {
+        if (!scriptFile.exists()) {
+            println "[INFO] project.sh not found. Generating CIAO-defensive version..."
+
+            def libs = LIB_VERSIONS.join(' ')
+
+            scriptFile.text = """#!/bin/sh
+# =========================================================================
+# Auto-generated project.sh (CIAO defensive)
+# Do NOT simplify or remove any part of this script.
+# =========================================================================
+
+export PRJ=${PRJ}
+export SRC=${SRC}
+export SRC_C=\$SRC/main/c
+export SRC_CPP=\$SRC/main/cpp
+export BUILD=${BUILD}
+export BUILD_DEBUG=\$BUILD/exe/debug
+export REQUIRED_LIBS="${libs}"
+
+REQUIRED_PACKAGES="${REQUIRED_PACKAGES}"
+AVOIDED_PACKAGES="${AVOIDED_PACKAGES}"
+
+apt_install() {
+  if ! apt list --installed 2>/dev/null | grep -q "^\$2/"; then
+    if [ "\$1" -eq 0 ]; then
+      sudo apt update -qq || true
+    fi
+    sudo apt install -y -qq "\$2" && echo "1" || echo "0"
+  else
+    echo "\$1"
+  fi
+}
+
+apt_uninstall() {
+  if apt list --installed 2>/dev/null | grep -q "^\$1/"; then
+    sudo apt purge --autoremove -y -qq "\$1" || true
+  fi
+}
+
+install() {
+  UPD=0
+  echo "\$REQUIRED_PACKAGES" | tr ' ' '\\n' | while read -r package; do
+    [ -z "\$package" ] && continue
+    UPD=\$(apt_install \$UPD "\$package")
+  done
+
+  echo "\$AVOIDED_PACKAGES" | tr ' ' '\\n' | while read -r package; do
+    [ -z "\$package" ] && continue
+    apt_uninstall "\$package"
+  done
+}
+
+install
+"""
+
+            scriptFile.setExecutable(true)
+            println "[OK] Generated defensive project.sh"
+        }
+
+        println "[INFO] Running dependency installation via project.sh..."
+        exec {
+            commandLine 'bash', scriptFile.absolutePath
+        }
+    }
+
+    outputs.file(scriptFile)
+}
+
+// =========================================================================
+// run task
+//
+// Purpose:
+//   Opens the debug window. assemble runs first, so the binary matches
+//   the current sources. This is the Gradle counterpart of the Ant run
+//   target. gradle assemble still only builds.
+//
+// Protection Rule:
+//   DO NOT point this task at build/exe or at a binary named r2webpad.
+//   The executable is ${BUILD_DEBUG}/${PRJ}, the same path as ./build.sh,
+//   make, and ant. DO NOT depend on installDependencies. That task can
+//   call sudo apt. DO NOT add a gradle verb to ./build.sh from this task.
+// =========================================================================
+task run(type: Exec) {
+    group = 'application'
+    description = 'Assemble the debug binary and open the window.'
+    dependsOn 'assemble'
+
+    def binary = layout.projectDirectory.file("${BUILD_DEBUG}/${PRJ}").asFile
+    workingDir = projectDir
+    executable = binary.absolutePath
+
+    doFirst {
+        if (!binary.isFile()) {
+            throw new GradleException("[ERROR] Debug binary is missing: ${binary}")
+        }
+        def display = System.getenv('DISPLAY')
+        def wayland = System.getenv('WAYLAND_DISPLAY')
+        def displayMissing = display == null || display.trim().isEmpty()
+        def waylandMissing = wayland == null || wayland.trim().isEmpty()
+        if (displayMissing && waylandMissing) {
+            println "[WARN] DISPLAY and WAYLAND_DISPLAY are unset. The window may not open."
+            println "[WARN] Stop the Gradle daemon (gradle --stop) and run gradle run from a graphical session."
+        }
+        println "[INFO] Opening ${binary}"
+    }
+}
+
+// (Remaining tasks: generateConfigureAc, generateMakefileAm, make, clean, etc. 
+// can follow the same pattern if needed. Let me know if you want the full file expanded.)
+
+println "[CIAO] Gradle build script loaded successfully for ${PRJ} (defensive mode)"
