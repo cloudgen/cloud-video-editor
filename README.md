@@ -135,4 +135,4 @@ MIT. See [LICENSE.md](LICENSE.md).
 
 ## Last Update
 
-2026-10-11. Version 1.0.0. The picture window, the Windows process host, and the screenshots above are part of this version.
+2026-10-14. Version 1.0.0. The picture window, the Windows process host, and the screenshots above are part of this version.

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Product identity is VideoTools `1.0.0` (`project.h`, `project.ini`). A bare start on a terminal with a display opens the picture window. With no display, or when standard output is not a terminal, that start shows the menu. With no terminal on standard input, it prints help.
+- README pictures show the current edit page after a file is chosen, and the join page before any file is chosen.
 - `--gemini` opens the inherited wilgat shell. `log`, `luascript`, and `logcheck` still open that shell. `--window` is an error.
 - The shell runtime id is `VideoTools`. Cookies, userscripts, and logs for that shell use `~/.app/VideoTools/`.
 
