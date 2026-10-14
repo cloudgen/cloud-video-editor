@@ -97,6 +97,9 @@ docs/playbook
 # =============================================
 # CIAO / Project specific
 # =============================================
+# Local harness boot contract. Not the product ship surface.
+/AGENTS.md
+
 # Ignore backup files
 *.bak
 *.backup

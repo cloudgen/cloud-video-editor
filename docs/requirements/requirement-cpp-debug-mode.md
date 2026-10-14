@@ -28,7 +28,7 @@ The C++ userscript loader must show its important runtime values when debug mode
 
 | You do… | What it means | What you type |
 |---------|---------------|---------------|
-| Inspect the loader | Debug is on and quiet is off, so each important value is printed | `DEBUG=1 ./target/exe/debug/gemini-wilgat` |
+| Inspect the loader | Debug is on and quiet is off, so each important value is printed | `DEBUG=1 ./target/exe/debug/cloud-video-editor` |
 
 ## 2. Core rules
 

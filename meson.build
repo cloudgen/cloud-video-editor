@@ -1,8 +1,8 @@
-# meson.build — second build for VideoTools.
+# meson.build — second build for cloud-video-editor.
 # Compiles the same C++ sources as the g++ line in ./build.sh.
 # project() version matches the runtime macros in src/main/cpp/project.h (1.0.0).
 
-project('VideoTools', 'cpp',
+project('cloud-video-editor', 'cpp',
     version: '1.0.0',
     license: 'MIT',
     default_options: [
@@ -22,20 +22,31 @@ lua_dep = dependency('lua5.3', required: true)
 thread_dep = dependency('threads', required: true)
 epoxy_dep = dependency('epoxy', required: true)
 # Headers only. The binary loads libmpv.so.2 with dlopen and must not gain NEEDED libmpv.
-mpv_dep = dependency('mpv', required: false)
-if mpv_dep.found()
-    mpv_headers = mpv_dep.partial_dependency(compile_args: true, includes: true)
+# pkg-config --exists often fails when Requires.private packages are absent.
+# Use --cflags, then MPV_INCLUDE_DIR, /usr/include, and /usr/local/include.
+# Never dependency('mpv'): that puts libmpv on the link line.
+mpv_compile_args = []
+mpv_cflags_cmd = run_command('pkg-config', '--cflags', 'mpv', check: false)
+if mpv_cflags_cmd.returncode() == 0 and mpv_cflags_cmd.stdout().strip() != ''
+    mpv_compile_args = mpv_cflags_cmd.stdout().split()
 else
     cpp_compiler = meson.get_compiler('cpp')
+    mpv_include_candidates = []
     mpv_include_dir = run_command('printenv', 'MPV_INCLUDE_DIR', check: false).stdout().strip()
-    if mpv_include_dir != '' and cpp_compiler.has_header('mpv/client.h', args: ['-I' + mpv_include_dir])
-        mpv_headers = declare_dependency(include_directories: include_directories(mpv_include_dir))
-    elif cpp_compiler.has_header('mpv/client.h')
-        mpv_headers = declare_dependency()
-    else
-        error('mpv/client.h is required. Install libmpv-dev or set MPV_INCLUDE_DIR. Do not link -lmpv.')
+    if mpv_include_dir != ''
+        mpv_include_candidates += [mpv_include_dir]
     endif
+    mpv_include_candidates += ['/usr/include', '/usr/local/include']
+    foreach dir : mpv_include_candidates
+        if mpv_compile_args.length() == 0 and cpp_compiler.has_header('mpv/client.h', args: ['-I' + dir])
+            mpv_compile_args = ['-I' + dir]
+        endif
+    endforeach
 endif
+if mpv_compile_args.length() == 0
+    error('mpv/client.h was not found. Install libmpv-dev or set MPV_INCLUDE_DIR. Do not link -lmpv.')
+endif
+mpv_headers = declare_dependency(compile_args: mpv_compile_args)
 dl_dep = meson.get_compiler('cpp').find_library('dl', required: true)
 
 sol_inc = include_directories('/usr/local/include')
@@ -77,7 +88,7 @@ src_files = files(
     'src/main/cpp/gui_window.cpp',
 )
 
-executable('VideoTools',
+executable('cloud-video-editor',
     sources: src_files,
     include_directories: sol_inc,
     dependencies: [

@@ -16,8 +16,8 @@
 // =========================================================================
 // Project Identification and Metadata
 // =========================================================================
-#define PROJECT_ID      "VideoTools"
-#define PROJECT_NAME    "VideoTools"
+#define PROJECT_ID      "cloud-video-editor"
+#define PROJECT_NAME    "cloud-video-editor"
 
 // =========================================================================
 // Version Information
@@ -37,7 +37,7 @@
 // 
 // Note:
 //   Relative path under $HOME. Will be expanded to:
-//   ~/.app/VideoTools/cookies/   (PROJECT_ID)
+//   ~/.app/cloud-video-editor/cookies/   (PROJECT_ID)
 // =========================================================================
 #define PERSISTENCE_STORAGE_PATH ".app/" PROJECT_ID "/cookies"
 

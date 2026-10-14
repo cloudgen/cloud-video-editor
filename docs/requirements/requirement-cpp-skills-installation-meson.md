@@ -1,6 +1,6 @@
 **file**: docs/requirements/requirement-cpp-skills-installation-meson.md
 **Status**: Active
-**Updated**: 2026-10-04
+**Updated**: 2026-10-14
 **Philosophy**: CIAO v2.10.2 / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
 ## 1. Purpose
@@ -9,7 +9,7 @@ This file owns `meson.build`. Meson compiles the same C++ sources as `./build.sh
 
 ### 1.1 Human-facing
 
-**In one sentence:** You can compile gemini-wilgat with Meson, and that build compiles every `src/main/cpp/*.cpp` file.
+**In one sentence:** You can compile cloud-video-editor with Meson, and that build compiles every `src/main/cpp/*.cpp` file.
 
 | Box | Meaning | Example |
 |-----|---------|---------|
@@ -24,7 +24,7 @@ This file owns `meson.build`. Meson compiles the same C++ sources as `./build.sh
 | Surface | What you open | What for |
 |---------|---------------|----------|
 | `meson.build` | Build definition | Sources and dependencies |
-| `builddir` | Meson output | The `gemini-wilgat` executable |
+| `builddir` | Meson output | The `cloud-video-editor` executable |
 
 | You do… | What it means | What you type |
 |---------|---------------|---------------|
@@ -32,8 +32,8 @@ This file owns `meson.build`. Meson compiles the same C++ sources as `./build.sh
 
 ## 2. Core rules
 
-- `project()` name is `gemini-wilgat`. The language is C++17.
-- The executable name is `gemini-wilgat`.
+- `project()` name is `cloud-video-editor`. The language is C++17. That name equals `PRJ` in `project.ini` and `PROJECT_NAME` in `src/main/cpp/project.h`.
+- The executable name is `cloud-video-editor`.
 - `dependency()` entries are the link set in `requirement-cpp-dependencies.md`, each `required: true`, including `threads`.
 - C++ include directory: `/usr/local/include` so `sol/sol.hpp` resolves. What that header is for is owned by `requirement-cpp-lua-script.md`.
 - Sources are every `src/main/cpp/*.cpp` file.
@@ -52,11 +52,15 @@ Current sources:
 - `src/main/cpp/load_page_ogin_check.cpp`
 - `src/main/cpp/login_detector_app.cpp`
 - `src/main/cpp/log_commands.cpp`
+- `src/main/cpp/log_format.cpp`
+- `src/main/cpp/log_view_html.cpp`
+- `src/main/cpp/lua_script_commands.cpp`
 - `src/main/cpp/main.cpp`
 - `src/main/cpp/menu_bookmark.cpp`
 - `src/main/cpp/menu_bookmark_app.cpp`
 - `src/main/cpp/menu_exit.cpp`
 - `src/main/cpp/menu_log.cpp`
+- `src/main/cpp/menu_lua_script.cpp`
 - `src/main/cpp/menu_user_agent.cpp`
 - `src/main/cpp/output.cpp`
 - `src/main/cpp/path_utils.cpp`
@@ -68,8 +72,14 @@ Current sources:
 - `src/main/cpp/url_bar_user_agent.cpp`
 - `src/main/cpp/webkit_setup.cpp`
 - `src/main/cpp/userscript_manager.cpp`
+- `src/main/cpp/video_domain.cpp`
+- `src/main/cpp/video_host.cpp`
+- `src/main/cpp/gui_dispatch.cpp`
+- `src/main/cpp/gui_format.cpp`
+- `src/main/cpp/gui_player.cpp`
+- `src/main/cpp/gui_window.cpp`
 
-The `project()` version is 1.0.7, the same numbers as the `project.h` macros. `project.ini` `VERSION` and the README badge stay 1.0.6 until those two are aligned. Do not invent another version number.
+The `project()` version is `1.0.0`. That is `VERSION_MAJOR`, `VERSION_MINOR`, and `VERSION_PATCH` in `src/main/cpp/project.h`, and it is `VERSION` in `project.ini`. `cloud-video-editor version` prints `cloud-video-editor 1.0.0`. Do not invent another version number.
 
 ## 3. Protection rule
 
@@ -86,5 +96,5 @@ Future editors must not drop `userscript_manager.cpp` from `meson.build` while `
 | `docs/requirements/requirement-cpp-lua-script.md` | sol2 binding those headers provide |
 | `docs/requirements/requirement-cpp-dependencies.md` | Link set those `dependency()` calls must match |
 
-**Last updated**: 2026-10-04
+**Last updated**: 2026-10-14
 **Owner**: Meson build

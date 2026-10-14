@@ -9,7 +9,7 @@ This file owns the two directories people confuse: the source tree, and the runt
 
 ### 1.1 Human-facing
 
-**In one sentence:** Source stays in this repository, and cookies and settings stay in `~/.app/VideoTools/`, which is a different folder.
+**In one sentence:** Source stays in this repository, and cookies and settings stay in `~/.app/cloud-video-editor/`, which is a different folder.
 
 | Box | Meaning | Example |
 |-----|---------|---------|
@@ -24,7 +24,7 @@ This file owns the two directories people confuse: the source tree, and the runt
 | Surface | What you open | What for |
 |---------|---------------|----------|
 | Repository root | Source and `./build.sh` | Build |
-| `~/.app/VideoTools/` | Runtime data | Config, settings, cookies, userscripts |
+| `~/.app/cloud-video-editor/` | Runtime data | Config, settings, cookies, userscripts |
 
 | You do… | What it means | What you type |
 |---------|---------------|---------------|
@@ -35,7 +35,7 @@ This file owns the two directories people confuse: the source tree, and the runt
 Source repository (milestone 1.0):
 
 ```text
-VideoTools/
+cloud-video-editor/
 ├── README.md
 ├── build.sh
 ├── project.sh
@@ -69,7 +69,7 @@ Paths in C++ come from `PROJECT_ID` and the config getters. A literal `~/.app/gm
 
 ### 2.1 Implementation notes (this project)
 
-`PROJECT_ID` is `VideoTools`. The runtime root is `~/.app/VideoTools/`. The g++ binary is `target/exe/debug/VideoTools`.
+`PROJECT_ID` is `cloud-video-editor`. The runtime root is `~/.app/cloud-video-editor/`. The g++ binary is `target/exe/debug/cloud-video-editor`.
 
 ## 3. Protection rule
 

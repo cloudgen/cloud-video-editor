@@ -1240,7 +1240,7 @@ int gui_window_open(int argc, char **argv)
 
     gtk_disable_setlocale();
     if (!gtk_init_check(&local_argc, &local_argv)) {
-        std::fputs("ERROR: the display was refused. The next step is VideoTools tui.\n", stderr);
+        std::fprintf(stderr, "ERROR: the display was refused. The next step is %s tui.\n", PROJECT_NAME);
         return 1;
     }
     ciao_debug_from_env();

@@ -5,7 +5,7 @@
 
 ## 1. Purpose
 
-Gradle is not a build of gemini-wilgat. `./build.sh` does not implement a `gradle` verb, and this tree has no `gradlew`. The live compile paths are `requirement-cpp-skills-installation-basic.md` and `requirement-cpp-skills-installation-meson.md`.
+Gradle is not a build of cloud-video-editor. `./build.sh` does not implement a `gradle` verb, and this tree has no `gradlew`. The live compile paths are `requirement-cpp-skills-installation-basic.md` and `requirement-cpp-skills-installation-meson.md`.
 
 ### 1.1 Human-facing
 
@@ -34,7 +34,7 @@ Gradle is not a build of gemini-wilgat. `./build.sh` does not implement a `gradl
 
 - Do not document `target/debug/r2webpad` or `target/exe/debug/r2webpad` as this product's binary.
 - Do not document `./gradlew` or `./build.sh gradle` as a current command.
-- This file becomes Active only in the same change that adds the verb to the `build.sh` case statement and names the binary `target/exe/debug/gemini-wilgat`.
+- This file becomes Active only in the same change that adds the verb to the `build.sh` case statement and names the binary `target/exe/debug/cloud-video-editor`.
 
 ## 3. Protection rule
 

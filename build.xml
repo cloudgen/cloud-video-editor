@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="VideoTools" default="build" basedir=".">
+<project name="cloud-video-editor" default="build" basedir=".">
     <property name="version" value="1.0.1"/>
     <!-- Define project properties -->
     <property file="project.ini"/>
@@ -15,7 +15,7 @@
     <property name="author" value="july.wong@gmail.com"/>
     <property name="lib.versions" value="gtk+-3.0 webkit2gtk-4.1 glib-2.0 gobject-2.0 gio-2.0 sqlite3 lua5.3"/>
     <property name="project.sh" value="./project.sh"/>
-    <property name="required.packages" value="build-essential libwebkit2gtk-4.1-dev libsqlite3-dev liblua5.3-dev lua5.3"/>
+    <property name="required.packages" value="build-essential libwebkit2gtk-4.1-dev libsqlite3-dev liblua5.3-dev lua5.3 libmpv-dev"/>
     <property name="avoided.packages" value=""/>
     <macrodef name="replace-property" taskname="@{taskname}">
         <attribute name="src" />
@@ -46,7 +46,7 @@
             <mkdir dir="@{objdir}"/>
             <exec executable="bash" failonerror="true">
                 <arg value="-c"/>
-                <arg value="root='@{srcdir}'; ext='@{ext}'; objroot='@{objdir}'; if [ ! -d &quot;$root&quot; ]; then exit 0; fi; while IFS= read -r -d '' src; do rel=&quot;$${src#&quot;$root/&quot;}&quot;; obj=&quot;$objroot/$rel.o&quot;; mkdir -p &quot;$(dirname &quot;$obj&quot;)&quot;; @{compiler} -std=@{std} -Wall -Wextra -g -O2 -I/usr/local/include ${pkg.cflags} -c &quot;$src&quot; -o &quot;$obj&quot; || exit 1; done &lt; &lt;(find &quot;$root&quot; -type f -name &quot;*.$ext&quot; -print0); exit 0"/>
+                <arg value="root='@{srcdir}'; ext='@{ext}'; objroot='@{objdir}'; if [ ! -d &quot;$root&quot; ]; then exit 0; fi; while IFS= read -r -d '' src; do rel=&quot;$${src#&quot;$root/&quot;}&quot;; obj=&quot;$objroot/$rel.o&quot;; mkdir -p &quot;$(dirname &quot;$obj&quot;)&quot;; @{compiler} -std=@{std} -Wall -Wextra -g -O2 -I/usr/local/include ${pkg.cflags} ${epoxy.cflags} ${mpv.cflags} -c &quot;$src&quot; -o &quot;$obj&quot; || exit 1; done &lt; &lt;(find &quot;$root&quot; -type f -name &quot;*.$ext&quot; -print0); exit 0"/>
             </exec>
         </sequential>
     </macrodef>
@@ -187,11 +187,114 @@ apt_uninstall() {
   fi 
 }
 
+# libmpv-dev is headers only. Do not link -lmpv.
+detect_pm() {
+  if command -v apt-get >/dev/null 2>&1; then
+    echo apt
+  elif command -v pacman >/dev/null 2>&1; then
+    echo pacman
+  elif command -v dnf >/dev/null 2>&1; then
+    echo dnf
+  elif command -v yum >/dev/null 2>&1; then
+    echo yum
+  elif command -v zypper >/dev/null 2>&1; then
+    echo zypper
+  elif command -v apk >/dev/null 2>&1; then
+    echo apk
+  elif command -v xbps-install >/dev/null 2>&1; then
+    echo xbps
+  elif command -v brew >/dev/null 2>&1; then
+    echo brew
+  else
+    echo unknown
+  fi
+}
+
+native_pkg() {
+  deb=$1
+  pm=$2
+  if [ "$deb" != "libmpv-dev" ]; then
+    printf '%s\n' "$deb"
+    return
+  fi
+  case "$pm" in
+    apt) printf '%s\n' libmpv-dev ;;
+    pacman|brew) printf '%s\n' mpv ;;
+    dnf|yum|zypper|xbps) printf '%s\n' mpv-devel ;;
+    apk) printf '%s\n' mpv-dev ;;
+    *) printf '%s\n' libmpv-dev ;;
+  esac
+}
+
+pm_install() {
+  upd=$1
+  deb=$2
+  pm=$(detect_pm)
+  case "$pm" in
+    apt)
+      apt_install "$upd" "$deb"
+      ;;
+    *)
+      pkg=$(native_pkg "$deb" "$pm")
+      if [ "$pkg" = "$deb" ]; then
+        if [ "$deb" = "libmpv-dev" ]; then
+          echo "[ERROR] mpv/client.h was not found. Install libmpv-dev or set MPV_INCLUDE_DIR. Do not link -lmpv." >&2
+        else
+          echo "[WARN] No $pm package name for $deb. Skipping." >&2
+        fi
+        echo "$upd"
+        return
+      fi
+      case "$pm" in
+        pacman)
+          if ! pacman -Q "$pkg" >/dev/null 2>&1; then
+            sudo pacman -S --noconfirm --needed "$pkg"
+          fi
+          ;;
+        dnf)
+          if ! rpm -q "$pkg" >/dev/null 2>&1; then
+            sudo dnf install -y "$pkg"
+          fi
+          ;;
+        yum)
+          if ! rpm -q "$pkg" >/dev/null 2>&1; then
+            sudo yum install -y "$pkg"
+          fi
+          ;;
+        zypper)
+          if ! rpm -q "$pkg" >/dev/null 2>&1; then
+            sudo zypper --non-interactive install "$pkg"
+          fi
+          ;;
+        apk)
+          if ! apk info -e "$pkg" >/dev/null 2>&1; then
+            sudo apk add "$pkg"
+          fi
+          ;;
+        xbps)
+          if ! xbps-query "$pkg" >/dev/null 2>&1; then
+            sudo xbps-install -y "$pkg"
+          fi
+          ;;
+        brew)
+          if ! brew list --formula "$pkg" >/dev/null 2>&1; then
+            brew install "$pkg"
+          fi
+          ;;
+        *)
+          echo "[ERROR] mpv/client.h was not found. Install libmpv-dev or set MPV_INCLUDE_DIR. Do not link -lmpv." >&2
+          ;;
+      esac
+      echo "$upd"
+      ;;
+  esac
+}
+
 install() {
   UPD=0
   echo "$REQUIRED_PACKAGES" | tr ' ' '\n' | while read -r package; do
     if [ ! -z "$package" ]; then
-      UPD=$(apt_install $UPD "$package")
+      UPD=$(pm_install $UPD "$package")
     fi
   done
 
@@ -259,10 +362,6 @@ install
         </condition>
         <property name="linker" value="gcc"/>
 
-        <mkdir dir="${build.debug.dir}"/>
-        <delete dir="${build.obj.dir}"/>
-        <mkdir dir="${build.obj.dir}"/>
-
         <exec executable="pkg-config" failonerror="true" outputproperty="pkg.cflags">
             <arg value="--cflags"/>
             <arg line="${lib.versions}"/>
@@ -271,6 +370,30 @@ install
             <arg value="--libs"/>
             <arg line="${lib.versions}"/>
         </exec>
+        <exec executable="pkg-config" failonerror="true" outputproperty="epoxy.cflags">
+            <arg value="--cflags"/>
+            <arg value="epoxy"/>
+        </exec>
+        <exec executable="pkg-config" failonerror="true" outputproperty="epoxy.libs">
+            <arg value="--libs"/>
+            <arg value="epoxy"/>
+        </exec>
+        <!-- Compile-only mpv cflags. Same search as build.sh. Do not pass mpv libs. The binary dlopens libmpv.so.2. -->
+        <exec executable="bash" failonerror="false" resultproperty="mpv.probe.code" outputproperty="mpv.cflags">
+            <arg value="-c"/>
+            <arg value="MPV_CFLAGS=''; if pkg-config --cflags mpv &gt;/dev/null 2&gt;&amp;1; then MPV_CFLAGS=$(pkg-config --cflags mpv); fi; if [ -z &quot;$MPV_CFLAGS&quot; ]; then for dir in ${MPV_INCLUDE_DIR:-} /usr/include /usr/local/include; do if [ -n &quot;$dir&quot; ] &amp;&amp; [ -f &quot;$dir/mpv/client.h&quot; ]; then MPV_CFLAGS=&quot;-I$dir&quot;; break; fi; done; fi; if [ -z &quot;$MPV_CFLAGS&quot; ]; then exit 1; fi; printf '%s\n' &quot;$MPV_CFLAGS&quot;"/>
+        </exec>
+        <fail message="mpv/client.h was not found. Install libmpv-dev or set MPV_INCLUDE_DIR. Do not link -lmpv.">
+            <condition>
+                <not>
+                    <equals arg1="${mpv.probe.code}" arg2="0"/>
+                </not>
+            </condition>
+        </fail>
+
+        <mkdir dir="${build.debug.dir}"/>
+        <delete dir="${build.obj.dir}"/>
+        <mkdir dir="${build.obj.dir}"/>
 
         <echo message="C files: ${c.count}; C++ files: ${cpp.count}; linker: ${linker}"/>
         <compile-lang compiler="gcc" std="c11" srcdir="${src.c.dir}" ext="c" objdir="${build.obj.dir}/c"/>
@@ -286,7 +409,9 @@ install
             <arg value="-o"/>
             <arg value="${build.debug.dir}/${app.name}"/>
             <arg line="${pkg.libs}"/>
+            <arg line="${epoxy.libs}"/>
             <arg value="-pthread"/>
+            <arg value="-ldl"/>
         </exec>
     </target>
 
@@ -346,8 +471,19 @@ install
       <antcall target="build"/>
     </target>
 
-    <!-- Target to run the application -->
+    <!--
+      Run the binary. build-if-not-exists compiles only when that file is missing.
+      script allocates a terminal. A bare start opens the video window only when
+      stdin and stdout are terminals and a display is set. Ant exec alone is not
+      a terminal, so the same start would print help and exit 0.
+    -->
     <target name="run" depends="build-if-not-exists">
-        <exec executable="${build.debug.dir}/${app.name}"/>
+        <exec executable="script" failonerror="true">
+            <arg value="--quiet"/>
+            <arg value="--return"/>
+            <arg value="--command"/>
+            <arg value="${build.debug.dir}/${app.name}"/>
+            <arg value="/dev/null"/>
+        </exec>
     </target>
 </project>

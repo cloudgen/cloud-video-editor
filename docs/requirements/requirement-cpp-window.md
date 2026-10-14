@@ -24,7 +24,7 @@ This is the single owner of the live gemini-wilgat window: what page opens, how 
 | Surface | What you open | What for |
 |---------|---------------|----------|
 | The gemini-wilgat window | The WebKit view | The start page |
-| `~/.app/VideoTools/userscripts/*.lua` | Userscript directory | Page hooks |
+| `~/.app/cloud-video-editor/userscripts/*.lua` | Userscript directory | Page hooks |
 
 | You do… | What it means | What you type |
 |---------|---------------|---------------|
@@ -35,9 +35,9 @@ This is the single owner of the live gemini-wilgat window: what page opens, how 
 
 ### 2.1 Identity of the window
 
-- The runtime id is `PROJECT_ID` in `src/main/cpp/project.h`. For this product that value is `VideoTools`.
-- The display name is `PROJECT_NAME`: `VideoTools`.
-- Cookies, userscripts, and logs for this shell live under `~/.app/VideoTools/` because those paths follow `PROJECT_ID`. Root or sudo logs use `/var/VideoTools/log`.
+- The runtime id is `PROJECT_ID` in `src/main/cpp/project.h`. For this product that value is `cloud-video-editor`.
+- The display name is `PROJECT_NAME`: `cloud-video-editor`.
+- Cookies, userscripts, and logs for this shell live under `~/.app/cloud-video-editor/` because those paths follow `PROJECT_ID`. Root or sudo logs use `/var/cloud-video-editor/log`.
 - The start page is `START_PAGE`: `https://gemini.google.com`.
 - `PROFILE_PAGE` is defined as `START_PAGE` plus `/settings/profile`. It is not the start page. The bookmark list must not add it; that rule is owned by `requirement-cpp-webui-bookmark.md`.
 
@@ -104,7 +104,7 @@ The About menu and the unattached About dialog are owned by `requirement-cpp-ui-
 
 ### 2.10 Userscripts
 
-Directory: `~/.app/` plus `PROJECT_ID` plus `/userscripts`. For this product that is `~/.app/VideoTools/userscripts`. The directory is created at startup with mode `0700` when missing. Showing that folder, and viewing, editing, or creating a file there, is `requirement-cpp-lua-script-commands.md`.
+Directory: `~/.app/` plus `PROJECT_ID` plus `/userscripts`. For this product that is `~/.app/cloud-video-editor/userscripts`. The directory is created at startup with mode `0700` when missing. Showing that folder, and viewing, editing, or creating a file there, is `requirement-cpp-lua-script-commands.md`.
 
 Every `*.lua` file in that directory is loaded in alphabetical order. Header lines `-- @match` and `-- @priority` are read. Higher priority runs first. The default priority is 50. A script with no `@match` runs on every URL change. When `DEBUG=1` is on, the loader prints the values owned by `requirement-cpp-debug-mode.md`.
 

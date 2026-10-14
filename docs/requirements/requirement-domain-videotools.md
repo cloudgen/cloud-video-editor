@@ -6,11 +6,11 @@
 
 ## 1. Purpose
 
-This file is the domain surface for the C++ VideoTools program built in this checkout. The architecture comes from the gemini-wilgat bootstrap. The jobs are the join and edit steps. `src/main/cpp/video_domain.cpp` is the ship unit for those jobs. A bare start on a terminal with a display opens the picture window in `requirement-cpp-gui.md`. The inherited wilgat window stays behind `--gemini`, `log`, `luascript`, and `logcheck`. `--window` is an error.
+This file is the domain surface for the C++ cloud-video-editor program built in this checkout. The architecture comes from the gemini-wilgat bootstrap. The jobs are the join and edit steps. `src/main/cpp/video_domain.cpp` is the ship unit for those jobs. A bare start on a terminal with a display opens the picture window in `requirement-cpp-gui.md`. The inherited wilgat window stays behind `--gemini`, `log`, `luascript`, and `logcheck`. `--window` is an error.
 
 ### 1.1 Human-facing
 
-**In one sentence:** VideoTools joins two videos in the current folder, and it can cut, speed, or boomerang one MP4.
+**In one sentence:** cloud-video-editor joins two videos in the current folder, and it can cut, speed, or boomerang one MP4.
 
 | Includes | Excludes |
 |----------|----------|
@@ -20,11 +20,11 @@ This file is the domain surface for the C++ VideoTools program built in this che
 
 | You do… | What it means | What you type |
 |---------|---------------|---------------|
-| Join two videos | Name both files, or answer the questions on a terminal | `VideoTools join --first a.mp4 --second b.mp4` |
-| See what can be joined | List eligible files in this folder and stop | `VideoTools list-videos` |
-| Cut and speed one file | Pass the file, start, end, and optional percent and tail | `VideoTools edit --file clip.mp4 --start 1 --end 5 --percent 50` |
-| See MP4 files | List MP4 files under a folder and stop | `VideoTools list-mp4` |
-| Read about | Name, version, both jobs, FFmpeg, ffprobe | `VideoTools about` |
+| Join two videos | Name both files, or answer the questions on a terminal | `cloud-video-editor join --first a.mp4 --second b.mp4` |
+| See what can be joined | List eligible files in this folder and stop | `cloud-video-editor list-videos` |
+| Cut and speed one file | Pass the file, start, end, and optional percent and tail | `cloud-video-editor edit --file clip.mp4 --start 1 --end 5 --percent 50` |
+| See MP4 files | List MP4 files under a folder and stop | `cloud-video-editor list-mp4` |
+| Read about | Name, version, both jobs, FFmpeg, ffprobe | `cloud-video-editor about` |
 
 ## 2. Core rules
 
@@ -39,7 +39,7 @@ This file is the domain surface for the C++ VideoTools program built in this che
 | `list-mp4` | Print MP4 paths under `--folder` or the current folder. Do not encode |
 | `help` | Print the catalog below and return 0 |
 | `about` | Print the about lines and return 0 |
-| `version` | Print `VideoTools` and `1.0.0` |
+| `version` | Print `cloud-video-editor` and `1.0.0` |
 | `tui` | The numbered menu. With no terminal, exit 1 |
 
 Flags: `--file`, `--folder`, `--start`, `--end`, `--percent`, `--boomerang`, `--repeat`, `--first`, `--second`, `--output`, `--json`.
@@ -71,17 +71,17 @@ Flags: `--file`, `--folder`, `--start`, `--end`, `--percent`, `--boomerang`, `--
 
 ### 2.3 Specialized help items
 
-`VideoTools help` must state: join is the current folder only; the five join suffixes; first video then second; the default join name; `list-videos` does not join; stream copy then re-encode; edit cut, percent 20–200, one tail; MP4 only; `list-mp4` does not encode; the edit filename; the flags; `--json`; FFmpeg and ffprobe; a bare start with a display opens the picture window; with no display, or when standard output is not a terminal, that start shows the menu; `tui` always shows the menu; join does not cut or speed; `log`, `luascript`, and `logcheck` keep the shell; `--gemini` opens that shell; `--window` is an error.
+`cloud-video-editor help` must state: join is the current folder only; the five join suffixes; first video then second; the default join name; `list-videos` does not join; stream copy then re-encode; edit cut, percent 20–200, one tail; MP4 only; `list-mp4` does not encode; the edit filename; the flags; `--json`; FFmpeg and ffprobe; a bare start with a display opens the picture window; with no display, or when standard output is not a terminal, that start shows the menu; `tui` always shows the menu; join does not cut or speed; `log`, `luascript`, and `logcheck` keep the shell; `--gemini` opens that shell; `--window` is an error.
 
 ### 2.4 Specialized about items
 
 | Field | Content |
 |-------|---------|
-| Product name | VideoTools |
+| Product name | cloud-video-editor |
 | Version | `1.0.0` from `project.h` |
 | Domain summary | Join two local videos, and cut, speed, or boomerang an MP4 |
 | Runtime tools | FFmpeg for copy, re-encode, cut, and speed. ffprobe for duration |
-| Entry | `VideoTools` |
+| Entry | `cloud-video-editor` |
 | Bootstrap | A bare start on a terminal with a display opens the picture window. `--gemini` opens the gemini-wilgat shell. About says that. `--window` is an error |
 
 ### 2.5 Implementation notes (this project)
@@ -91,7 +91,7 @@ Flags: `--file`, `--folder`, `--start`, `--end`, `--percent`, `--boomerang`, `--
 | Checkout | This workspace (`cloud-video-editor`). The Python project at the sibling `VideoTools` root is a different ship unit and is not overwritten |
 | Bootstrap origin | `gemini-wilgat`, left unchanged |
 | Domain source | `src/main/cpp/video_domain.cpp` |
-| Binary | `target/exe/debug/VideoTools`, produced by `g++ -std=c++17` |
+| Binary | `target/exe/debug/cloud-video-editor`, produced by `g++ -std=c++17` |
 | Version | `1.0.0` |
 | Menu | Numbered rows 1 join, 2 edit, 3 list-videos, 4 list-mp4, 5 help, 6 about, 7 version, 9 Exit. Not the thirteen-language painter |
 | Duration tool | `ffprobe`, not an OpenCV link |
@@ -111,4 +111,4 @@ Do not point this product's default start at the Gemini page. Do not copy this d
 | `src/main/cpp/main.cpp` | Sends domain starts here. `--gemini` reaches the wilgat shell. `--window` does not |
 
 **Last updated**: 2026-10-11
-**Owner**: VideoTools domain
+**Owner**: cloud-video-editor domain

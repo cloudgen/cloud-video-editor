@@ -851,7 +851,7 @@ double probe_duration(State &state, const std::string &path)
 {
     if (!on_path("ffprobe")) {
         out_err(state, "ERROR: ffprobe not found on PATH.");
-        out_err(state, "   VideoTools reads duration with ffprobe from the FFmpeg package.");
+        out_err(state, std::string("   ") + PROJECT_NAME + " reads duration with ffprobe from the FFmpeg package.");
         remember(state, "ffprobe not found on PATH.", "Install FFmpeg so ffprobe is on PATH.");
         return 0.0;
     }
@@ -1466,8 +1466,19 @@ int cmd_edit(State &state, const std::string &file, const std::string &folder, c
 void print_help(State &state)
 {
     state.mode = "help";
+    const std::string name(PROJECT_NAME);
+    const std::string banner = name + " " + version_text()
+        + " — join two local videos, and cut, speed, or boomerang an MP4.";
+    const std::string open = "On a terminal with a display, " + name
+        + " with no words opens the video window.";
+    const std::string ex_join = "  " + name + " join --first a.mp4 --second b.mp4";
+    const std::string ex_list = "  " + name + " list-videos";
+    const std::string ex_edit = "  " + name + " edit --file clip.mp4 --start 1 --end 5 --percent 50";
+    const std::string ex_boom = "  " + name + " edit --file clip.mp4 --start 1 --end 5 --percent 50 --boomerang";
+    const std::string ex_mp4 = "  " + name + " list-mp4";
+    const std::string ex_about = "  " + name + " about";
     const char *lines[] = {
-        "VideoTools 1.0.0 — join two local videos, and cut, speed, or boomerang an MP4.",
+        banner.c_str(),
         "Join looks only in the current folder. It does not ask for a folder and it is not recursive.",
         "Join formats: .mp4 .mov .mkv .avi .m4v",
         "Join selection: first video, then the second from the list that remains.",
@@ -1483,17 +1494,17 @@ void print_help(State &state)
         "Flags: --file --folder --start --end --percent --boomerang --repeat --first --second --output --json",
         "--json prints one object and does not open the menu.",
         "FFmpeg must be on PATH before a join or an encode. ffprobe reads duration.",
-        "On a terminal with a display, VideoTools with no words opens the video window.",
+        open.c_str(),
         "With no display, or when standard output is not a terminal, that start shows the menu. Row 1 is join. Row 2 is edit. tui always shows the menu.",
         "Join does not cut, speed, or boomerang.",
         "log, luascript, and logcheck keep the gemini-wilgat shell. --gemini opens that shell. --window is an error.",
         "Examples:",
-        "  VideoTools join --first a.mp4 --second b.mp4",
-        "  VideoTools list-videos",
-        "  VideoTools edit --file clip.mp4 --start 1 --end 5 --percent 50",
-        "  VideoTools edit --file clip.mp4 --start 1 --end 5 --percent 50 --boomerang",
-        "  VideoTools list-mp4",
-        "  VideoTools about",
+        ex_join.c_str(),
+        ex_list.c_str(),
+        ex_edit.c_str(),
+        ex_boom.c_str(),
+        ex_mp4.c_str(),
+        ex_about.c_str(),
         NULL
     };
     if (state.json) {
@@ -1510,11 +1521,11 @@ void print_about(State &state)
     if (state.json) {
         return;
     }
-    std::puts("VideoTools");
+    std::puts(PROJECT_NAME);
     std::printf("Version: %s\n", version_text().c_str());
     std::puts(PROJECT_DESCRIPTION);
     std::puts("Runtime tools: FFmpeg (copy, re-encode, cut, speed); ffprobe (duration).");
-    std::puts("Entry: VideoTools");
+    std::printf("Entry: %s\n", PROJECT_NAME);
     std::puts("A bare start on a terminal with a display opens the video window.");
     std::puts("Bootstrapped from gemini-wilgat. --gemini opens that shell.");
 }
@@ -1738,7 +1749,7 @@ int video_domain_run(int argc, char **argv)
     }
     if (!parsed.bad.empty()) {
         out_err(state, "ERROR: " + parsed.bad);
-        remember(state, parsed.bad, "VideoTools help");
+        remember(state, parsed.bad, std::string(PROJECT_NAME) + " help");
         return finish(state, 1);
     }
     if (parsed.boomerang && parsed.repeat) {

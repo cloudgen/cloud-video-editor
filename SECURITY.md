@@ -1,6 +1,6 @@
 # Security Policy
 
-VideoTools 1.0.0 joins two local videos and cuts, speeds, or boomerangs an MP4. It also opens a picture window for those jobs. `--gemini`, `log`, `luascript`, and `logcheck` open the inherited WebKit shell.
+cloud-video-editor 1.0.0 joins two local videos and cuts, speeds, or boomerangs an MP4. It also opens a picture window for those jobs. `--gemini`, `log`, `luascript`, and `logcheck` open the inherited WebKit shell.
 
 ## Supported Versions
 
@@ -43,7 +43,7 @@ In scope:
 - Local join and edit, including the files `ffmpeg` and `ffprobe` read and write
 - The picture window and the playback library it loads at runtime
 - The inherited WebKit shell opened only by `--gemini`, `log`, `luascript`, or `logcheck`
-- Persistence under `~/.app/VideoTools/` (`PROJECT_ID` in `src/main/cpp/project.h`)
+- Persistence under `~/.app/cloud-video-editor/` (`PROJECT_ID` in `src/main/cpp/project.h`)
 
 Out of scope:
 

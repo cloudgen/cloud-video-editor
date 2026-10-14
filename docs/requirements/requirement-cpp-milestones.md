@@ -47,7 +47,7 @@ In the tree now:
 - File → Lua Script and the `luascript` verb, owned by `requirement-cpp-lua-script-commands.md`.
 - Show Version and the unattached About dialog, owned by `requirement-cpp-ui-menu.md`.
 - GStreamer environment and auto-allow permission requests.
-- `./build.sh` verbs `install`, `clean`, and `build`. Binary `target/exe/debug/gemini-wilgat`.
+- `./build.sh` verbs `install`, `clean`, and `build`. Binary `target/exe/debug/cloud-video-editor`.
 - Meson builds the same `src/main/cpp/*.cpp` sources.
 
 ### Milestone 2.0 — config-driven leftovers

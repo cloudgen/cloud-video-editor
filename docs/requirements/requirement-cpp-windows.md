@@ -6,15 +6,15 @@
 
 ## 1. Purpose
 
-This file owns the Windows contract for VideoTools: how a child process starts, how paths are joined, and how `ffmpeg` is found on Windows cmd. The picture window on Windows is the same window as `requirement-cpp-gui.md` when that build has GTK, libmpv, and a display. This file does not claim that the current checkout was compiled on Windows.
+This file owns the Windows contract for cloud-video-editor: how a child process starts, how paths are joined, and how `ffmpeg` is found on Windows cmd. The picture window on Windows is the same window as `requirement-cpp-gui.md` when that build has GTK, libmpv, and a display. This file does not claim that the current checkout was compiled on Windows.
 
 ### 1.1 Human-facing
 
-**In one sentence:** On Windows cmd you run VideoTools as yourself, with `ffmpeg` and `ffprobe` already on `PATH`.
+**In one sentence:** On Windows cmd you run cloud-video-editor as yourself, with `ffmpeg` and `ffprobe` already on `PATH`.
 
 | Box | Meaning | Example |
 |-----|---------|---------|
-| You / this login | The person in Command Prompt | You run `VideoTools join --first a.mp4 --second b.mp4` |
+| You / this login | The person in Command Prompt | You run `cloud-video-editor join --first a.mp4 --second b.mp4` |
 | The other role | The process host | It starts `ffmpeg` with `CreateProcessW` and no shell |
 | Not this file | Widget layout and the WebKit shell | `requirement-cpp-gui.md` and `requirement-cpp-window.md` |
 
@@ -24,13 +24,13 @@ This file owns the Windows contract for VideoTools: how a child process starts, 
 
 | Surface | What you open | What for |
 |---------|---------------|----------|
-| Windows cmd | `VideoTools` | Join, edit, list, help, about, version |
+| Windows cmd | `cloud-video-editor` | Join, edit, list, help, about, version |
 | A Windows build that has GTK, libmpv, and a display | The picture window | The same edit and join pages |
 
 | You do… | What it means | What you type |
 |---------|---------------|---------------|
-| Join two files | The program finds `ffmpeg` on `PATH` and starts it without a shell | `VideoTools join --first a.mp4 --second b.mp4` |
-| Name a file with backslashes | The base name is the part after the last slash or backslash | `VideoTools edit --file C:\clips\bar.mp4 --start 0 --end 1` |
+| Join two files | The program finds `ffmpeg` on `PATH` and starts it without a shell | `cloud-video-editor join --first a.mp4 --second b.mp4` |
+| Name a file with backslashes | The base name is the part after the last slash or backslash | `cloud-video-editor edit --file C:\clips\bar.mp4 --start 0 --end 1` |
 
 ## 2. Core rules
 
@@ -77,7 +77,7 @@ The verified compiler for this checkout is `g++` on Linux. Windows sources are i
 | Host | `src/main/cpp/video_host.cpp` |
 | Callers | `run_process`, `probe_duration`, and `make_temp` in `src/main/cpp/video_domain.cpp` |
 | Tools | `ffmpeg` and `ffprobe` on `PATH`. On Windows the lookup also accepts `ffmpeg.exe` and `ffprobe.exe` |
-| Binary name | `VideoTools`. A Windows build may be `VideoTools.exe` |
+| Binary name | `cloud-video-editor`. A Windows build may be `cloud-video-editor.exe` |
 | Privilege | Normal user. The binary does not install packages |
 
 ### 2.5 Why this requirement exists
@@ -114,4 +114,4 @@ Future editors must not start `ffmpeg` through `cmd.exe`, `system`, or `popen`, 
 | `tests/test_video_host.cpp` | Base name, parent, and join checks |
 
 **Last updated**: 2026-10-11
-**Owner**: VideoTools Windows host
+**Owner**: cloud-video-editor Windows host

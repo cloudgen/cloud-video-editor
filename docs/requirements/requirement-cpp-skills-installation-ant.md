@@ -5,7 +5,7 @@
 
 ## 1. Purpose
 
-Apache Ant is not a build of gemini-wilgat. `./build.sh` does not implement an `ant` verb. The live compile paths are `requirement-cpp-skills-installation-basic.md` and `requirement-cpp-skills-installation-meson.md`.
+Apache Ant is not a build of cloud-video-editor. `./build.sh` does not implement an `ant` verb. The live compile paths are `requirement-cpp-skills-installation-basic.md` and `requirement-cpp-skills-installation-meson.md`.
 
 ### 1.1 Human-facing
 
@@ -34,7 +34,7 @@ Apache Ant is not a build of gemini-wilgat. `./build.sh` does not implement an `
 
 - Do not document `target/debug/r2webpad` or `target/exe/debug/r2webpad` as this product's binary.
 - Do not document `ant install`, `ant build`, or `./build.sh ant` as a current command.
-- This file becomes Active only in the same change that adds the verb to the `build.sh` case statement and names the binary `target/exe/debug/gemini-wilgat`.
+- This file becomes Active only in the same change that adds the verb to the `build.sh` case statement and names the binary `target/exe/debug/cloud-video-editor`.
 
 ## 3. Protection rule
 

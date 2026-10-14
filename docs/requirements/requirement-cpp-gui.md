@@ -6,15 +6,15 @@
 
 ## 1. Purpose
 
-This file owns the VideoTools picture window: which start opens it, the edit and join controls, playback inside the panes, and the encode result the window shows. The gemini-wilgat WebKit shell is a different window. That shell stays in `requirement-cpp-window.md`. `--gemini` opens that shell. `--window` is an error and opens neither window.
+This file owns the cloud-video-editor picture window: which start opens it, the edit and join controls, playback inside the panes, and the encode result the window shows. The gemini-wilgat WebKit shell is a different window. That shell stays in `requirement-cpp-window.md`. `--gemini` opens that shell. `--window` is an error and opens neither window.
 
 ### 1.1 Human-facing
 
-**In one sentence:** On a terminal that has a display, VideoTools with no words opens the video window.
+**In one sentence:** On a terminal that has a display, cloud-video-editor with no words opens the video window.
 
 | Box | Meaning | Example |
 |-----|---------|---------|
-| You / this login | The person at the keyboard | You start VideoTools with no words |
+| You / this login | The person at the keyboard | You start cloud-video-editor with no words |
 | The other role | The picture window | It shows the edit page and plays the file you pick |
 | Not this file | The WebKit shell, and the numbered menu | `requirement-cpp-window.md` and `requirement-domain-videotools.md` |
 
@@ -24,15 +24,15 @@ This file owns the VideoTools picture window: which start opens it, the edit and
 
 | Surface | What you open | What for |
 |---------|---------------|----------|
-| `VideoTools` | Picture window | Edit or join when a display and both terminal sides are present |
-| `VideoTools --gemini` | Inherited shell | The WebKit window, not this file |
-| `VideoTools tui` | Numbered menu | Text menu, not this window |
+| `cloud-video-editor` | Picture window | Edit or join when a display and both terminal sides are present |
+| `cloud-video-editor --gemini` | Inherited shell | The WebKit window, not this file |
+| `cloud-video-editor tui` | Numbered menu | Text menu, not this window |
 
 | You do… | What it means | What you type |
 |---------|---------------|---------------|
-| Open the picture window | No words, a display, and both standard input and standard output are terminals | `VideoTools` |
-| Stay on the menu | No display, or standard output is not a terminal | `VideoTools` |
-| Refuse a bad flag | `--window` prints an error and does not open a window | `VideoTools --window` |
+| Open the picture window | No words, a display, and both standard input and standard output are terminals | `cloud-video-editor` |
+| Stay on the menu | No display, or standard output is not a terminal | `cloud-video-editor` |
+| Refuse a bad flag | `--window` prints an error and does not open a window | `cloud-video-editor --window` |
 
 ## 2. Core rules
 
@@ -59,16 +59,16 @@ The route is decided before GTK and before the WebKit environment block.
 A refused display prints one stderr line and exits 1. It does not fall through to the menu.
 
 ```text
-ERROR: the display was refused. The next step is VideoTools tui.
+ERROR: the display was refused. The next step is cloud-video-editor tui.
 ```
 
 The video path calls `gtk_disable_setlocale()` and then `gtk_init_check()`. It does not call `gtk_init`. It does not call `ciao_output_init`. It may call `ciao_debug_from_env()`.
 
 ### 2.2 Chrome
 
-The title is `VideoTools` plus the version. The default size is 1280×800. Edit is the first page. The group strip is `join` and `edit`, with the open group highlighted, and no row numbers. The header ends with system-log, language, self-management, and Exit. `help` and `tui` are not window buttons. The path label is `Path: ` plus the absolute current folder.
+The title is `cloud-video-editor` plus the version. The default size is 1280×800. Edit is the first page. The group strip is `join` and `edit`, with the open group highlighted, and no row numbers. The header ends with system-log, language, self-management, and Exit. `help` and `tui` are not window buttons. The path label is `Path: ` plus the absolute current folder.
 
-English labels stay English. The language page says `This tree has no language catalog. Labels stay English.` The self page shows VideoTools, the version, the project description, and the binary path. It has no pip buttons.
+English labels stay English. The language page says `This tree has no language catalog. Labels stay English.` The self page shows cloud-video-editor, the version, the project description, and the binary path. It has no pip buttons.
 
 ### 2.3 Edit page
 
@@ -118,7 +118,7 @@ The page shows the log folder from `ciao_log_directory()` and does not create th
 |------|--------|
 | Sources | `gui_dispatch.cpp`, `gui_format.cpp`, `gui_player.cpp`, `gui_window.cpp`, `video_job.h` |
 | Open call | `gui_window_open` from `video_domain_run` when the route is the window |
-| Binary | `target/exe/debug/VideoTools` |
+| Binary | `target/exe/debug/cloud-video-editor` |
 | Panes | Five: edit source, edit generated, join video 1, join video 2, join generated |
 | Clock | `gui_format_elapsed` prints `MM:SS.CC`. FFmpeg times stay `HH:MM:SS.mmm` |
 | Chooser | `GtkFileChooserDialog` only |
@@ -160,4 +160,4 @@ Future editors must not move the WebKit or GStreamer block into this window, cal
 | `src/main/cpp/gui_dispatch.cpp` | Route |
 
 **Last updated**: 2026-10-11
-**Owner**: VideoTools picture window
+**Owner**: cloud-video-editor picture window

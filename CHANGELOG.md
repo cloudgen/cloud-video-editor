@@ -8,17 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-10-11
 
 ### Added
-- VideoTools domain on the gemini-wilgat bootstrap: `join`, `edit`, `list-videos`, `list-mp4`, `help`, `about`, `version`, `tui`, and a numbered menu.
+- cloud-video-editor domain on the gemini-wilgat bootstrap: `join`, `edit`, `list-videos`, `list-mp4`, `help`, `about`, `version`, `tui`, and a numbered menu.
 - Picture window for edit and join. Playback is libmpv inside the panes. Encode stays FFmpeg. The binary loads `libmpv.so.2` at runtime and does not link `-lmpv`.
 - Windows process host: `CreateProcessW`, backslash joins, and `ffmpeg.exe` on `PATH`. The verified compile of this checkout is `g++` on Linux.
-- `g++ -std=c++17` remains the primary compile. The binary is `target/exe/debug/VideoTools`.
+- `g++ -std=c++17` remains the primary compile. The binary is `target/exe/debug/cloud-video-editor`. Ant and Gradle write that same path. Meson writes `builddir/cloud-video-editor`.
 - Join uses FFmpeg stream copy, then a re-encode. Edit cuts, changes length, and can append a boomerang or a repeat. Duration comes from `ffprobe`.
 
 ### Changed
-- Product identity is VideoTools `1.0.0` (`project.h`, `project.ini`). A bare start on a terminal with a display opens the picture window. With no display, or when standard output is not a terminal, that start shows the menu. With no terminal on standard input, it prints help.
+- Product identity is cloud-video-editor `1.0.0` (`project.h`, `project.ini`). A bare start on a terminal with a display opens the picture window. With no display, or when standard output is not a terminal, that start shows the menu. With no terminal on standard input, it prints help.
 - README pictures show the current edit page after a file is chosen, and the join page before any file is chosen.
 - `--gemini` opens the inherited wilgat shell. `log`, `luascript`, and `logcheck` still open that shell. `--window` is an error.
-- The shell runtime id is `VideoTools`. Cookies, userscripts, and logs for that shell use `~/.app/VideoTools/`.
+- The shell runtime id is `cloud-video-editor`. Cookies, userscripts, and logs for that shell use `~/.app/cloud-video-editor/`.
 
 ### Fixed
 - Closing the window while Run is in progress unrealizes the picture panes before the players are released.

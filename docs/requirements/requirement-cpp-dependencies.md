@@ -1,6 +1,6 @@
 **file**: docs/requirements/requirement-cpp-dependencies.md
 **Status**: Active
-**Updated**: 2026-10-11
+**Updated**: 2026-10-14
 **Philosophy**: CIAO v2.10.2 / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
 ## 1. Purpose
@@ -28,7 +28,7 @@ This file owns the libraries the gemini-wilgat C++ program compiles and links ag
 
 | You do… | What it means | What you type |
 |---------|---------------|---------------|
-| Install the libraries | Apt packages below, then sol2 headers when `<sol/sol.hpp>` is missing. `libmpv-dev` supplies headers. The link line does not pass `-lmpv` | `./build.sh install` |
+| Install the libraries | Apt packages below, then sol2 headers when `<sol/sol.hpp>` is missing. `libmpv-dev` supplies headers. Pacman, dnf, yum, zypper, apk, xbps, and Homebrew use the names in the libmpv row. The link line does not pass `-lmpv` | `./build.sh install`, `ant install`, or `gradle installDependencies` |
 
 ## 2. Core rules
 
@@ -47,14 +47,27 @@ The link set is exactly these modules. `./build.sh build` passes the pkg-config 
 | POSIX threads | Meson name `threads`; the simple link line adds `-pthread` | comes with `build-essential` |
 | libdl | the simple link line adds `-ldl` | comes with the C library |
 | sol2 | header `<sol/sol.hpp>` | no apt package; headers under `/usr/local/include/sol` |
+| libmpv headers | compile-only `mpv/client.h`; not a link module | `libmpv-dev` |
 
-libmpv is not in that link set. `build.sh` and `meson.build` may pass `-I` or compile-only mpv cflags so `mpv/client.h` resolves. They must not pass `--libs mpv` or `-lmpv`. `./build.sh install` may install `libmpv-dev` for the headers. The picture window loads `libmpv.so.2` at runtime. A missing `mpv/client.h` fails the compile with the sentence that names `MPV_INCLUDE_DIR` and says not to link `-lmpv`.
+libmpv is not in that link set. `build.sh`, `build.xml`, `build.gradle`, and `meson.build` may pass `-I` or compile-only mpv cflags so `mpv/client.h` resolves. They must not pass `--libs mpv` or `-lmpv`. The picture window loads `libmpv.so.2` at runtime. A missing `mpv/client.h` fails the compile with the sentence that names `MPV_INCLUDE_DIR` and says not to link `-lmpv`.
+
+`./build.sh install` installs the apt package `libmpv-dev`. `ant install` and `gradle installDependencies` install the same header package through the package manager on the machine:
+
+| Package manager | Package that provides `mpv/client.h` |
+|-----------------|--------------------------------------|
+| apt | `libmpv-dev` |
+| pacman | `mpv` |
+| dnf, yum, zypper, xbps | `mpv-devel` |
+| apk | `mpv-dev` |
+| Homebrew | `mpv` |
+
+Those install tasks keep `libmpv-dev` in the package list and translate that name before calling pacman, dnf, yum, zypper, apk, xbps, or brew. They still must not pass `-lmpv`. Debian package names other than `libmpv-dev` are not translated; on a non-apt system those other names are skipped.
 
 `./build.sh install` also installs `build-essential`, `pkg-config`, and `git`. `git` is there so the install step can clone sol2. The clone steps stay in `requirement-cpp-skills-installation-basic.md`. The sol2 API stays in `requirement-cpp-lua-script.md`.
 
 The second build needs `meson` and `ninja-build` on the developer machine. `./build.sh install` does not install those two packages.
 
-`project.ini` `REQUIRED_PACKAGES` also names `gstreamer1.0-plugins-good` and `gstreamer1.0-plugins-ugly`. `AVOIDED_PACKAGES` names `gstreamer1.0-plugins-bad`. Those three packages are absent from the link line, and `./build.sh install` does not install them. GStreamer environment variables stay in `requirement-cpp-window.md`.
+`project.ini` `REQUIRED_PACKAGES` also names `libmpv-dev`, `gstreamer1.0-plugins-good`, and `gstreamer1.0-plugins-ugly`. `AVOIDED_PACKAGES` names `gstreamer1.0-plugins-bad`. The GStreamer packages are absent from the link line, and `./build.sh install` does not install them. `libmpv-dev` in that list is the header package for the Ant and Gradle install tasks. GStreamer environment variables stay in `requirement-cpp-window.md`.
 
 `project.sh` `REQUIRED_LIBS` names `gtk+-3.0`, `webkit2gtk-4.1`, `sqlite3`, and `lua5.3`. `./build.sh` sources `project.sh` for paths. The `pkg-config` call inside `build()` uses the full link set in the table above.
 
@@ -70,7 +83,7 @@ gtk+-3.0 webkit2gtk-4.1 glib-2.0 gobject-2.0 gio-2.0 sqlite3 lua5.3
 
 The link line appends `-pthread` and `-ldl`. It does not append `-lmpv`.
 
-`meson.build` repeats those modules, adds `dependency('epoxy')` and `dependency('threads')`, and takes mpv compile arguments only when the mpv dependency is found. Its C++ include directory is `/usr/local/include` so `<sol/sol.hpp>` resolves.
+`meson.build` repeats those modules, adds `dependency('epoxy')` and `dependency('threads')`, and passes mpv compile arguments from `pkg-config --cflags mpv` or from `MPV_INCLUDE_DIR`, `/usr/include`, or `/usr/local/include`. It does not call `dependency('mpv')`. Its C++ include directory is `/usr/local/include` so `<sol/sol.hpp>` resolves. `build.xml` and `build.gradle` use that same header search, put epoxy on the compile and link lines, and add `-ldl` at link time. They do not pass mpv libraries.
 
 ### 2.2 Why this requirement exists
 
@@ -88,13 +101,13 @@ The link line appends `-pthread` and `-ldl`. It does not append `-lmpv`.
 
 | TP-ID | Pass |
 |-------|------|
-| TP-CPP-DEPENDENCIES | `pkg-config --exists` succeeds for `gtk+-3.0`, `webkit2gtk-4.1`, `glib-2.0`, `gobject-2.0`, `gio-2.0`, `sqlite3`, `lua5.3`, and `epoxy`. `build.sh` and `meson.build` both request that set, pass mpv include flags only, and do not pass `-lmpv` |
+| TP-CPP-DEPENDENCIES | `pkg-config --exists` succeeds for `gtk+-3.0`, `webkit2gtk-4.1`, `glib-2.0`, `gobject-2.0`, `gio-2.0`, `sqlite3`, `lua5.3`, and `epoxy`. `build.sh`, `build.xml`, `build.gradle`, and `meson.build` request that set, pass mpv include flags only, and do not pass `-lmpv` |
 
 Map: `docs/reviews/test-plan.md`. Status stays todo until that check is run.
 
 ## 5. Protection rule
 
-Future editors must not drop `libwebkit2gtk-4.1-dev`, `libsqlite3-dev`, `liblua5.3-dev`, or `libepoxy-dev` from this table, link a WebKit or Lua version other than 4.1 and 5.3, add `-lmpv` to the link line, or copy the package list back into `requirement-class-software-dev.md`.
+Future editors must not drop `libwebkit2gtk-4.1-dev`, `libsqlite3-dev`, `liblua5.3-dev`, `libepoxy-dev`, or `libmpv-dev` from this table, drop `libmpv-dev` from the Ant or Gradle install list, link a WebKit or Lua version other than 4.1 and 5.3, add `-lmpv` to the link line, or copy the package list back into `requirement-class-software-dev.md`.
 
 ## 6. Related artifacts
 
@@ -112,5 +125,5 @@ Future editors must not drop `libwebkit2gtk-4.1-dev`, `libsqlite3-dev`, `liblua5
 | `project.ini` | `REQUIRED_PACKAGES`, including the GStreamer plugin names |
 | `project.sh` | Shorter `REQUIRED_LIBS` |
 
-**Last updated**: 2026-10-11
+**Last updated**: 2026-10-14
 **Owner**: C++ dependencies

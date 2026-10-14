@@ -1,6 +1,6 @@
 #!/bin/bash
 # =========================================================================
-# build.sh - Build Script for VideoTools (g++ is the primary compiler)
+# build.sh - Build Script for cloud-video-editor (g++ is the primary compiler)
 # Minimal change: Sources project.sh as Single Source of Truth + safe fallbacks
 # =========================================================================
 

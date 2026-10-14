@@ -1,19 +1,19 @@
-# VideoTools - Join two local videos, and cut, speed, or boomerang an MP4.
+# cloud-video-editor - Join two local videos, and cut, speed, or boomerang an MP4.
 
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 [![CIAO](https://img.shields.io/badge/Philosophy-CIAO%20(Caution%20%E2%80%A2%20Intentional%20%E2%80%A2%20Anti--fragile%20%E2%80%A2%20Over--engineered)-purple.svg)](https://github.com/cloudgen/ciao)
 [![Stars](https://img.shields.io/github/stars/cloudgen/cloud-video-editor?style=flat-square)](https://github.com/cloudgen/cloud-video-editor)
 
-VideoTools joins two local videos, and it cuts, speeds, or boomerangs one MP4. The program is C++. `g++` is the compiler. On a terminal that has a display, a start with no words opens the picture window. FFmpeg does the encode. libmpv draws the picture inside the window.
+cloud-video-editor joins two local videos, and it cuts, speeds, or boomerangs one MP4. The program is C++. `g++` is the compiler. On a terminal that has a display, a start with no words opens the picture window. FFmpeg does the encode. libmpv draws the picture inside the window.
 
 You use it on your own files in the current folder. The program does not upload them.
 
 | Box | Meaning | Example |
 |-----|---------|---------|
-| You | The person at the keyboard | You start VideoTools with no words |
+| You | The person at the keyboard | You start cloud-video-editor with no words |
 | The window | Edit and join | You pick files and press Run |
-| Not the window | Typed verbs | `VideoTools join` and `VideoTools edit` stay on the terminal |
+| Not the window | Typed verbs | `cloud-video-editor join` and `cloud-video-editor edit` stay on the terminal |
 
 | Includes | Excludes |
 |----------|----------|
@@ -43,7 +43,7 @@ Install GTK 3, WebKitGTK 4.1, SQLite, Lua 5.3, epoxy, and the libmpv headers. Pu
 
 ```bash
 ./build.sh build
-./target/exe/debug/VideoTools version
+./target/exe/debug/cloud-video-editor version
 ```
 
 `./build.sh` reads `project.sh`. `./build.sh install` requests the apt packages and needs permission to install them. The same sources are listed in `meson.build` for a second build. Do not pass `-lmpv`.
@@ -53,7 +53,7 @@ On Windows cmd the same verbs run as a normal user. `ffmpeg.exe` and `ffprobe.ex
 With no display, on a terminal, a bare start shows this menu. `9` leaves.
 
 ```text
-$ env -u DISPLAY -u WAYLAND_DISPLAY ./target/exe/debug/VideoTools
+$ env -u DISPLAY -u WAYLAND_DISPLAY ./target/exe/debug/cloud-video-editor
 
 1. join        : pick two videos in this folder and concatenate
 2. edit        : cut, speed, and optional boomerang or repeat
@@ -66,21 +66,21 @@ $ env -u DISPLAY -u WAYLAND_DISPLAY ./target/exe/debug/VideoTools
 >
 ```
 
-`VideoTools version` prints `VideoTools 1.0.0`. The menu itself has no title line.
+`cloud-video-editor version` prints `cloud-video-editor 1.0.0`. The menu itself has no title line.
 
 ## Usage
 
 ```bash
-VideoTools
-VideoTools join --first a.mp4 --second b.mp4
-VideoTools list-videos
-VideoTools edit --file clip.mp4 --start 1 --end 5 --percent 50
-VideoTools edit --file clip.mp4 --start 1 --end 5 --boomerang
-VideoTools list-mp4
-VideoTools help
-VideoTools about
-VideoTools tui
-VideoTools --json version
+cloud-video-editor
+cloud-video-editor join --first a.mp4 --second b.mp4
+cloud-video-editor list-videos
+cloud-video-editor edit --file clip.mp4 --start 1 --end 5 --percent 50
+cloud-video-editor edit --file clip.mp4 --start 1 --end 5 --boomerang
+cloud-video-editor list-mp4
+cloud-video-editor help
+cloud-video-editor about
+cloud-video-editor tui
+cloud-video-editor --json version
 ```
 
 A bare start with a display and both terminal sides opens the picture window. Choose Edit or Join at the top. Select file, then Run. Closing the window while a job is running waits until that job finishes.
@@ -96,19 +96,19 @@ Edit takes one MP4. Percent defaults to 100 and must be from 20 to 200. The tail
 Cut the first five seconds and keep the original speed:
 
 ```bash
-VideoTools edit --file clip.mp4 --start 0 --end 5 --percent 100
+cloud-video-editor edit --file clip.mp4 --start 0 --end 5 --percent 100
 ```
 
 Join two files in the current folder and name the result:
 
 ```bash
-VideoTools join --first a.mp4 --second b.mp4 --output reel.mp4
+cloud-video-editor join --first a.mp4 --second b.mp4 --output reel.mp4
 ```
 
 Ask for one JSON object:
 
 ```bash
-VideoTools --json version
+cloud-video-editor --json version
 ```
 
 ## Platform Compatibility
